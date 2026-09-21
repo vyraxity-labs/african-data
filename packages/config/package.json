@@ -1,5 +1,23 @@
 {
   "name": "@repo/config",
   "version": "0.1.0",
-  "private": true
+  "private": true,
+  "exports": {
+    "./typescript/base": "./typescript/base.json",
+    "./typescript/base.json": "./typescript/base.json",
+    "./typescript/nextjs": "./typescript/nextjs.json",
+    "./typescript/nextjs.json": "./typescript/nextjs.json",
+    "./typescript/react-library": "./typescript/react-library.json",
+    "./typescript/react-library.json": "./typescript/react-library.json",
+    "./eslint/base": "./eslint/base.mjs",
+    "./eslint/nextjs": "./eslint/nextjs.mjs"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.21.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint": "^9.21.0",
+    "eslint-config-next": "^16.3.5",
+    "typescript": "^5.9.3"
+  }
 }
