@@ -18,7 +18,53 @@ model Institution {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // resources   Resource[]
+  resources   Resource[]
 
   @@index([name])
+}
+
+enum ResourceStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Resource {
+  id               String         @id @default(cuid())
+  name             String
+  description      String?
+
+  institutionId    String?
+
+  sourceType       String?
+  industry         String?
+  category         String?
+  countryCoverage  String?
+  dataGranularity  String?
+  language         String?
+  accessType       String?
+  updateFrequency  String?
+  apiAvailable     Boolean        @default(false)
+  priority         String?
+
+  notes            String?
+  metadata         Json?
+
+  status           ResourceStatus @default(DRAFT)
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  institution      Institution?   @relation(fields: [institutionId], references: [id])
+
+  // links            ResourceLink[]
+
+  @@index([name])
+  @@index([institutionId])
+  @@index([industry])
+  @@index([category])
+  @@index([sourceType])
+  @@index([accessType])
+  @@index([apiAvailable])
+  @@index([status])
 }

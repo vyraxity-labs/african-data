@@ -16,17 +16,22 @@
     "db:seed": "tsx seed.ts",
     "db:reset": "prisma migrate reset",
     "build": "prisma generate && prisma migrate deploy",
+    "test:resource": "tsx src/test-resource.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/adapter-ppg": "^7.10.0",
-    "@prisma/client": "^7.10.0"
+    "@prisma/client": "^7.10.0",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
     "@types/node": "^22.13.10",
+    "@types/pg": "^8.23.1",
     "dotenv": "^18.0.1",
     "prisma": "^7.10.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }
 }
