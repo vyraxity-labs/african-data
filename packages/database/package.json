@@ -17,6 +17,7 @@
     "db:reset": "prisma migrate reset",
     "build": "prisma generate && prisma migrate deploy",
     "test:resource": "tsx src/test-resource.ts",
+    "test:resource-link": "tsx src/test-resource-link.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

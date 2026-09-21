@@ -57,7 +57,7 @@ model Resource {
 
   institution      Institution?   @relation(fields: [institutionId], references: [id])
 
-  // links            ResourceLink[]
+  links            ResourceLink[]
 
   @@index([name])
   @@index([institutionId])
@@ -67,4 +67,53 @@ model Resource {
   @@index([accessType])
   @@index([apiAvailable])
   @@index([status])
+}
+
+enum LinkType {
+  DATA
+  WEBSITE
+  API
+  DOWNLOAD
+  DOCUMENTATION
+  OTHER
+}
+
+enum LinkHealthStatus {
+  UNKNOWN
+  HEALTHY
+  REDIRECTED
+  BROKEN
+  TIMEOUT
+  RATE_LIMITED
+  BLOCKED
+  SERVER_ERROR
+}
+
+model ResourceLink {
+  id                    String           @id @default(cuid())
+  resourceId            String
+
+  url                   String
+  linkType              LinkType
+
+  status                LinkHealthStatus @default(UNKNOWN)
+  httpStatus            Int?
+  finalUrl              String?
+
+  lastCheckedAt         DateTime?
+  lastSuccessfulCheckAt DateTime?
+
+  responseTimeMs        Int?
+  errorMessage          String?
+
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  resource              Resource         @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  // checks                LinkCheck[]
+
+  @@index([resourceId])
+  @@index([status])
+  @@index([lastCheckedAt])
 }
