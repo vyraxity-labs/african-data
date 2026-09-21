@@ -1,0 +1,8 @@
+{
+  "extends": "@repo/config/typescript/base.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  },
+  "include": ["src/**/*", "generated/**/*"],
+  "exclude": ["node_modules"]
+}

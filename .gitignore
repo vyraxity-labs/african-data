@@ -9,6 +9,7 @@ out/
 # Build artifacts
 dist/
 build/
+generated/
 *.tsbuildinfo
 
 # Turborepo
