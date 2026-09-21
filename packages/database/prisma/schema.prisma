@@ -111,9 +111,28 @@ model ResourceLink {
 
   resource              Resource         @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
-  // checks                LinkCheck[]
+  checks                LinkCheck[]
 
   @@index([resourceId])
   @@index([status])
   @@index([lastCheckedAt])
+}
+
+model LinkCheck {
+  id              String           @id @default(cuid())
+  linkId          String
+
+  checkedAt       DateTime         @default(now())
+
+  status          LinkHealthStatus
+  httpStatus      Int?
+  finalUrl        String?
+  responseTimeMs  Int?
+
+  errorType       String?
+  errorMessage    String?
+
+  link            ResourceLink     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId, checkedAt])
 }
