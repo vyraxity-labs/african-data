@@ -1,0 +1,16 @@
+{
+  "name": "african-data-platform",
+  "private": true,
+  "packageManager": "pnpm@11.18.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.2",
+    "typescript": "^5.8.2"
+  }
+}
