@@ -8,7 +8,7 @@ declare global {
 
 export function createPrismaClient(): PrismaClient {
   const connectionString =
-    process.env.DATABASE_URL ?? 'postgresql://app:app@localhost:5432/african_data';
+    process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/african_data_dev';
   const adapter = new PrismaPostgresAdapter({ connectionString });
   return new PrismaClient({ adapter });
 }
