@@ -20,6 +20,7 @@
     "test:resource-link": "tsx src/test-resource-link.ts",
     "test:link-check": "tsx src/test-link-check.ts",
     "test:custom-field": "tsx src/test-custom-field.ts",
+    "test:fixture": "tsx ../../fixtures/test-sample-fixture.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
