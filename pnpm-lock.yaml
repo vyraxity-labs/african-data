@@ -148,6 +148,9 @@ importers:
       '@prisma/client':
         specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3)
+      '@repo/validation':
+        specifier: workspace:*
+        version: link:../validation
       csv-parse:
         specifier: ^7.0.2
         version: 7.0.2

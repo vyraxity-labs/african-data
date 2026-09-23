@@ -22,12 +22,14 @@
     "test:custom-field": "tsx src/test-custom-field.ts",
     "test:fixture": "tsx ../../fixtures/test-sample-fixture.ts",
     "test:csv-parser": "tsx src/test-csv-parser.ts",
+    "test:csv-normalizer": "tsx src/test-csv-normalizer.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/adapter-ppg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "@repo/validation": "workspace:*",
     "csv-parse": "^7.0.2",
     "pg": "^8.23.0"
   },
