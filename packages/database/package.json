@@ -19,6 +19,7 @@
     "test:resource": "tsx src/test-resource.ts",
     "test:resource-link": "tsx src/test-resource-link.ts",
     "test:link-check": "tsx src/test-link-check.ts",
+    "test:custom-field": "tsx src/test-custom-field.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
