@@ -120,6 +120,28 @@ const LANGUAGE_MAP: Record<string, string[]> = {
   spanish: ['es'],
 }
 
+const AFRICAN_COUNTRY_MAP: Record<string, { code: string; region: string }> = {
+  nigeria: { code: 'NG', region: 'West Africa' },
+  ghana: { code: 'GH', region: 'West Africa' },
+  kenya: { code: 'KE', region: 'East Africa' },
+  'south africa': { code: 'ZA', region: 'Southern Africa' },
+  egypt: { code: 'EG', region: 'North Africa' },
+  ethiopia: { code: 'ET', region: 'East Africa' },
+  rwanda: { code: 'RW', region: 'East Africa' },
+  tanzania: { code: 'TZ', region: 'East Africa' },
+  uganda: { code: 'UG', region: 'East Africa' },
+  morocco: { code: 'MA', region: 'North Africa' },
+  algeria: { code: 'DZ', region: 'North Africa' },
+  senegal: { code: 'SN', region: 'West Africa' },
+  tunisia: { code: 'TN', region: 'North Africa' },
+  angola: { code: 'AO', region: 'Central Africa' },
+  cameroon: { code: 'CM', region: 'Central Africa' },
+  ivory_coast: { code: 'CI', region: 'West Africa' },
+  "côte d'ivoire": { code: 'CI', region: 'West Africa' },
+  zambia: { code: 'ZM', region: 'Southern Africa' },
+  zimbabwe: { code: 'ZW', region: 'Southern Africa' },
+}
+
 export function normalizeFormats(
   rawFormats: string,
   rowNumber: number,
@@ -270,7 +292,17 @@ export function normalizeCoverage(
   }
 
   // 4. National / Country-specific
-  if (lower === 'nigeria' || lower.includes('nigeria /')) {
+  const countryMatch = AFRICAN_COUNTRY_MAP[lower]
+  if (countryMatch) {
+    return {
+      raw: trimmed,
+      scope: 'NATIONAL',
+      regions: [countryMatch.region],
+      countries: [countryMatch.code],
+    }
+  }
+
+  if (lower.startsWith('nigeria /') || lower === 'nigeria') {
     return {
       raw: trimmed,
       scope: 'NATIONAL',
