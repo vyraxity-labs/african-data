@@ -16,6 +16,7 @@ export const baseConfig = [
       },
     },
     rules: {
+      "no-undef": "off",
       "no-unused-vars": "off",
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
