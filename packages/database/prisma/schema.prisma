@@ -136,3 +136,30 @@ model LinkCheck {
 
   @@index([linkId, checkedAt])
 }
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  SELECT
+  MULTI_SELECT
+  DATE
+  URL
+}
+
+model CustomFieldDefinition {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  label       String
+  description String?
+  type        CustomFieldType
+  filterable  Boolean         @default(false)
+  searchable  Boolean         @default(false)
+  required    Boolean         @default(false)
+  options     Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([filterable])
+  @@index([searchable])
+}
