@@ -21,12 +21,14 @@
     "test:link-check": "tsx src/test-link-check.ts",
     "test:custom-field": "tsx src/test-custom-field.ts",
     "test:fixture": "tsx ../../fixtures/test-sample-fixture.ts",
+    "test:csv-parser": "tsx src/test-csv-parser.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/adapter-ppg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "csv-parse": "^7.0.2",
     "pg": "^8.23.0"
   },
   "devDependencies": {
