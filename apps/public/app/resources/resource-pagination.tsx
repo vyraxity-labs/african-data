@@ -7,6 +7,7 @@ export interface ResourcePaginationProps {
   totalCount: number;
   pageSize: number;
   searchParams: Record<string, string | undefined>;
+  baseUrl?: string;
 }
 
 export function ResourcePagination({
@@ -15,6 +16,7 @@ export function ResourcePagination({
   totalCount,
   pageSize,
   searchParams,
+  baseUrl = '/resources',
 }: ResourcePaginationProps) {
   if (totalPages <= 1) return null;
 
@@ -26,7 +28,8 @@ export function ResourcePagination({
       }
     });
     params.set('page', String(page));
-    return `/resources?${params.toString()}`;
+    const queryString = params.toString();
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
   };
 
   const getVisiblePages = () => {

@@ -28,6 +28,7 @@
     "test:public-homepage": "tsx src/test-public-homepage.ts",
     "test:public-resources": "tsx src/test-public-resources.ts",
     "test:public-resource-detail": "tsx src/test-public-resource-detail.ts",
+    "test:public-institution-detail": "tsx src/test-public-institution-detail.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
