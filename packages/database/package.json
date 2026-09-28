@@ -24,6 +24,7 @@
     "test:csv-parser": "tsx src/test-csv-parser.ts",
     "test:csv-normalizer": "tsx src/test-csv-normalizer.ts",
     "test:import-preview": "tsx src/test-import-preview.ts",
+    "test:admin-upload": "tsx src/test-admin-upload.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

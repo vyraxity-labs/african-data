@@ -25,7 +25,10 @@ export default function AdminHomePage() {
       </div>
 
       <div className='mt-8 flex gap-4'>
-        <Button>Launch Link Monitor</Button>
+        <a href="/import">
+          <Button>Open CSV Ingestion Pipeline</Button>
+        </a>
+        <Button variant="outline">Launch Link Monitor</Button>
       </div>
     </main>
   )
