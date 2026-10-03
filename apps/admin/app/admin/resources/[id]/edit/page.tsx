@@ -5,6 +5,7 @@ import { prisma, ResourceStatus } from '@repo/database';
 import { ResourceForm } from '../../resource-form';
 import { updateResource } from '../../actions';
 import { ResourceStatusActions } from '../../resource-status-actions';
+import { ResourceLinksManager } from '../links/resource-links-manager';
 import { Badge, Card, CardHeader, CardTitle, CardContent } from '@repo/ui';
 
 export const dynamic = 'force-dynamic';
@@ -131,43 +132,18 @@ export default async function EditResourcePage(props: PageProps) {
               <CardHeader>
                 <CardTitle className="text-base">Linked Endpoints ({resource.links.length})</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {resource.links.length === 0 ? (
-                  <p className="text-xs text-slate-500 italic">
-                    No endpoint URLs currently attached to this dataset.
-                  </p>
-                ) : (
-                  resource.links.map((link) => (
-                    <div
-                      key={link.id}
-                      className="rounded-lg border border-slate-200 p-3 bg-slate-50 space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-700">{link.linkType}</span>
-                        <Badge
-                          variant={
-                            link.status === 'HEALTHY'
-                              ? 'success'
-                              : link.status === 'BROKEN'
-                                ? 'danger'
-                                : 'default'
-                          }
-                          size="sm"
-                        >
-                          {link.status}
-                        </Badge>
-                      </div>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block text-xs text-emerald-600 hover:underline truncate"
-                      >
-                        {link.url}
-                      </a>
-                    </div>
-                  ))
-                )}
+              <CardContent>
+                <ResourceLinksManager
+                  resourceId={resource.id}
+                  links={resource.links.map((link) => ({
+                    id: link.id,
+                    url: link.url,
+                    linkType: link.linkType,
+                    status: link.status,
+                    httpStatus: link.httpStatus,
+                    lastCheckedAt: link.lastCheckedAt,
+                  }))}
+                />
               </CardContent>
             </Card>
 
