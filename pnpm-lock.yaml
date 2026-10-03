@@ -195,6 +195,21 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/link-checker:
+    devDependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.13.10
+        version: 22.20.4
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/styles:
     devDependencies:
       tailwindcss:
