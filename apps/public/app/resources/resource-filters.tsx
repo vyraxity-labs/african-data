@@ -8,23 +8,37 @@ export interface ResourceFiltersProps {
   industries: string[]
   categories: string[]
   accessTypes: string[]
+  coverages: string[]
+  sourceTypes: string[]
+  languages: string[]
+  granularities: string[]
   currentParams: {
     q?: string
     industry?: string
     category?: string
+    coverage?: string
+    sourceType?: string
     access?: string
     api?: string
+    language?: string
+    granularity?: string
     sort?: string
     direction?: string
     pageSize?: string
   }
+  className?: string
 }
 
 export function ResourceFilters({
   industries,
   categories,
   accessTypes,
+  coverages,
+  sourceTypes,
+  languages,
+  granularities,
   currentParams,
+  className = '',
 }: ResourceFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -33,6 +47,7 @@ export function ResourceFilters({
   const currentQ = currentParams.q || ''
   const [searchTerm, setSearchTerm] = React.useState(currentQ)
   const [prevQ, setPrevQ] = React.useState(currentQ)
+  const [isAdvancedOpen, setIsAdvancedOpen] = React.useState(false)
 
   // Keep local search term synchronized if URL search parameter changes externally
   if (currentQ !== prevQ) {
@@ -69,17 +84,30 @@ export function ResourceFilters({
     router.push(pathname)
   }
 
+  const hasAdvancedFilters = Boolean(
+    currentParams.coverage ||
+    currentParams.sourceType ||
+    currentParams.language ||
+    currentParams.granularity,
+  )
+
   const hasActiveFilters = Boolean(
     currentParams.q ||
     currentParams.industry ||
     currentParams.category ||
+    currentParams.coverage ||
+    currentParams.sourceType ||
     currentParams.access ||
     currentParams.api ||
+    currentParams.language ||
+    currentParams.granularity ||
     (currentParams.sort && currentParams.sort !== 'name'),
   )
 
   return (
-    <div className='space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs'>
+    <div
+      className={`space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto overscroll-contain scrollbar-thin [scrollbar-color:#cbd5e1_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400 [&::-webkit-scrollbar-track]:bg-transparent ${className}`}
+    >
       {/* Search Input Bar */}
       <form onSubmit={handleSearchSubmit} className='flex gap-2'>
         <div className='relative flex-1'>
@@ -102,7 +130,7 @@ export function ResourceFilters({
             type='text'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder='Search by keyword, indicator, or custodian (e.g. inflation, AfDB, malaria)...'
+            placeholder='Search keyword, indicator, or custodian...'
             className='w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-colors'
           />
           {searchTerm && (
@@ -138,8 +166,8 @@ export function ResourceFilters({
         </Button>
       </form>
 
-      {/* Filter Dropdowns Row */}
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-3 pt-2 border-t border-slate-100'>
+      {/* Primary Filter Dropdowns */}
+      <div className='space-y-3 pt-2 border-t border-slate-100'>
         {/* Industry / Sector Filter */}
         <div>
           <label className='block text-xs font-semibold text-slate-700 mb-1'>
@@ -221,8 +249,114 @@ export function ResourceFilters({
           </select>
         </div>
 
+        {/* Advanced Filters Toggle */}
+        <div className='pt-1'>
+          <button
+            type='button'
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className='flex items-center justify-between w-full text-xs font-semibold text-slate-700 hover:text-emerald-700 py-1'
+          >
+            <span className='flex items-center gap-1.5'>
+              <span>More Filters</span>
+              {hasAdvancedFilters && (
+                <span className='inline-flex h-2 w-2 rounded-full bg-emerald-500' />
+              )}
+            </span>
+            <span>{isAdvancedOpen ? '▲' : '▼'}</span>
+          </button>
+        </div>
+
+        {/* Advanced Filter Fields (Coverage, Source Type, Language, Granularity) */}
+        {(isAdvancedOpen || hasAdvancedFilters) && (
+          <div className='space-y-3 pt-2 border-t border-slate-100'>
+            {/* Country / Coverage Filter */}
+            <div>
+              <label className='block text-xs font-semibold text-slate-700 mb-1'>
+                Country / Coverage
+              </label>
+              <select
+                value={currentParams.coverage || ''}
+                onChange={(e) =>
+                  updateFilters({ coverage: e.target.value || undefined })
+                }
+                className='w-full rounded-lg border border-slate-300 bg-white py-1.5 px-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500'
+              >
+                <option value=''>All Coverage Areas</option>
+                {coverages.map((cov) => (
+                  <option key={cov} value={cov}>
+                    {cov}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Source Type Filter */}
+            <div>
+              <label className='block text-xs font-semibold text-slate-700 mb-1'>
+                Source Type
+              </label>
+              <select
+                value={currentParams.sourceType || ''}
+                onChange={(e) =>
+                  updateFilters({ sourceType: e.target.value || undefined })
+                }
+                className='w-full rounded-lg border border-slate-300 bg-white py-1.5 px-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500'
+              >
+                <option value=''>All Source Types</option>
+                {sourceTypes.map((st) => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Language Filter */}
+            <div>
+              <label className='block text-xs font-semibold text-slate-700 mb-1'>
+                Language
+              </label>
+              <select
+                value={currentParams.language || ''}
+                onChange={(e) =>
+                  updateFilters({ language: e.target.value || undefined })
+                }
+                className='w-full rounded-lg border border-slate-300 bg-white py-1.5 px-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500'
+              >
+                <option value=''>All Languages</option>
+                {languages.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Data Granularity Filter */}
+            <div>
+              <label className='block text-xs font-semibold text-slate-700 mb-1'>
+                Data Granularity
+              </label>
+              <select
+                value={currentParams.granularity || ''}
+                onChange={(e) =>
+                  updateFilters({ granularity: e.target.value || undefined })
+                }
+                className='w-full rounded-lg border border-slate-300 bg-white py-1.5 px-2.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500'
+              >
+                <option value=''>All Granularities</option>
+                {granularities.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
         {/* Sort Options */}
-        <div>
+        <div className='pt-2 border-t border-slate-100'>
           <label className='block text-xs font-semibold text-slate-700 mb-1'>
             Sort Order
           </label>
@@ -245,7 +379,7 @@ export function ResourceFilters({
       {/* Active Filter Chips & Reset Bar */}
       {hasActiveFilters && (
         <div className='flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs'>
-          <span className='font-semibold text-slate-500'>Active filters:</span>
+          <span className='font-semibold text-slate-500'>Active:</span>
           {currentParams.q && (
             <span className='inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-emerald-800 ring-1 ring-emerald-600/20'>
               Query: &ldquo;{currentParams.q}&rdquo;
@@ -254,7 +388,7 @@ export function ResourceFilters({
                 onClick={() => updateFilters({ q: undefined })}
                 className='hover:text-emerald-950 font-bold ml-0.5'
               >
-                ×
+                &times;
               </button>
             </span>
           )}
@@ -266,7 +400,7 @@ export function ResourceFilters({
                 onClick={() => updateFilters({ industry: undefined })}
                 className='hover:text-slate-900 font-bold ml-0.5'
               >
-                ×
+                &times;
               </button>
             </span>
           )}
@@ -278,7 +412,31 @@ export function ResourceFilters({
                 onClick={() => updateFilters({ category: undefined })}
                 className='hover:text-slate-900 font-bold ml-0.5'
               >
-                ×
+                &times;
+              </button>
+            </span>
+          )}
+          {currentParams.coverage && (
+            <span className='inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-slate-700'>
+              Coverage: {currentParams.coverage}
+              <button
+                type='button'
+                onClick={() => updateFilters({ coverage: undefined })}
+                className='hover:text-slate-900 font-bold ml-0.5'
+              >
+                &times;
+              </button>
+            </span>
+          )}
+          {currentParams.sourceType && (
+            <span className='inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-slate-700'>
+              Source: {currentParams.sourceType}
+              <button
+                type='button'
+                onClick={() => updateFilters({ sourceType: undefined })}
+                className='hover:text-slate-900 font-bold ml-0.5'
+              >
+                &times;
               </button>
             </span>
           )}
@@ -290,7 +448,7 @@ export function ResourceFilters({
                 onClick={() => updateFilters({ access: undefined })}
                 className='hover:text-slate-900 font-bold ml-0.5'
               >
-                ×
+                &times;
               </button>
             </span>
           )}
@@ -302,7 +460,31 @@ export function ResourceFilters({
                 onClick={() => updateFilters({ api: undefined })}
                 className='hover:text-slate-900 font-bold ml-0.5'
               >
-                ×
+                &times;
+              </button>
+            </span>
+          )}
+          {currentParams.language && (
+            <span className='inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-slate-700'>
+              Language: {currentParams.language}
+              <button
+                type='button'
+                onClick={() => updateFilters({ language: undefined })}
+                className='hover:text-slate-900 font-bold ml-0.5'
+              >
+                &times;
+              </button>
+            </span>
+          )}
+          {currentParams.granularity && (
+            <span className='inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-slate-700'>
+              Granularity: {currentParams.granularity}
+              <button
+                type='button'
+                onClick={() => updateFilters({ granularity: undefined })}
+                className='hover:text-slate-900 font-bold ml-0.5'
+              >
+                &times;
               </button>
             </span>
           )}
@@ -311,7 +493,7 @@ export function ResourceFilters({
             onClick={handleResetFilters}
             className='text-xs text-red-600 hover:text-red-700 hover:underline ml-auto font-medium'
           >
-            Clear all filters
+            Clear all
           </button>
         </div>
       )}
