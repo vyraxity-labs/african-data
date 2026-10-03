@@ -66,6 +66,9 @@ model Resource {
   @@index([sourceType])
   @@index([accessType])
   @@index([apiAvailable])
+  @@index([countryCoverage])
+  @@index([language])
+  @@index([dataGranularity])
   @@index([status])
 }
 

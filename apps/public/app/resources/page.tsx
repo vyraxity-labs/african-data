@@ -22,8 +22,12 @@ export default async function ResourcesPage(props: PageProps) {
   const q = getParam('q')?.trim() || '';
   const industry = getParam('industry')?.trim() || '';
   const category = getParam('category')?.trim() || '';
+  const coverage = getParam('coverage')?.trim() || '';
+  const sourceType = getParam('sourceType')?.trim() || '';
   const access = getParam('access')?.trim() || '';
   const api = getParam('api')?.trim() || '';
+  const language = getParam('language')?.trim() || '';
+  const granularity = getParam('granularity')?.trim() || '';
   const sort = getParam('sort')?.trim() || 'name';
   const direction = (getParam('direction')?.toLowerCase() === 'desc' ? 'desc' : 'asc') as 'asc' | 'desc';
   const rawPage = parseInt(getParam('page') || '1', 10);
@@ -52,6 +56,14 @@ export default async function ResourcesPage(props: PageProps) {
     where.category = category;
   }
 
+  if (coverage) {
+    where.countryCoverage = coverage;
+  }
+
+  if (sourceType) {
+    where.sourceType = sourceType;
+  }
+
   if (access) {
     where.accessType = access;
   }
@@ -60,6 +72,14 @@ export default async function ResourcesPage(props: PageProps) {
     where.apiAvailable = true;
   } else if (api === 'false') {
     where.apiAvailable = false;
+  }
+
+  if (language) {
+    where.language = language;
+  }
+
+  if (granularity) {
+    where.dataGranularity = granularity;
   }
 
   // Safe sorting field mapping
@@ -72,48 +92,77 @@ export default async function ResourcesPage(props: PageProps) {
     orderBy = { name: direction };
   }
 
-  // Perform bounded server queries
-  const [totalCount, resources, distinctIndustriesRaw, distinctCategoriesRaw, distinctAccessRaw] =
-    await Promise.all([
-      prisma.resource.count({ where }),
-      prisma.resource.findMany({
-        where,
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy,
-        include: {
-          institution: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          links: {
-            select: {
-              id: true,
-              url: true,
-              linkType: true,
-              status: true,
-            },
+  // Perform bounded server queries concurrently
+  const [
+    totalCount,
+    resources,
+    distinctIndustriesRaw,
+    distinctCategoriesRaw,
+    distinctAccessRaw,
+    distinctCoveragesRaw,
+    distinctSourceTypesRaw,
+    distinctLanguagesRaw,
+    distinctGranularitiesRaw,
+  ] = await Promise.all([
+    prisma.resource.count({ where }),
+    prisma.resource.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy,
+      include: {
+        institution: {
+          select: {
+            id: true,
+            name: true,
           },
         },
-      }),
-      prisma.resource.findMany({
-        where: { status: ResourceStatus.ACTIVE, industry: { not: null } },
-        distinct: ['industry'],
-        select: { industry: true },
-      }),
-      prisma.resource.findMany({
-        where: { status: ResourceStatus.ACTIVE, category: { not: null } },
-        distinct: ['category'],
-        select: { category: true },
-      }),
-      prisma.resource.findMany({
-        where: { status: ResourceStatus.ACTIVE, accessType: { not: null } },
-        distinct: ['accessType'],
-        select: { accessType: true },
-      }),
-    ]);
+        links: {
+          select: {
+            id: true,
+            url: true,
+            linkType: true,
+            status: true,
+          },
+        },
+      },
+    }),
+    prisma.resource.findMany({
+      where: { status: ResourceStatus.ACTIVE, industry: { not: null } },
+      distinct: ['industry'],
+      select: { industry: true },
+    }),
+    prisma.resource.findMany({
+      where: { status: ResourceStatus.ACTIVE, category: { not: null } },
+      distinct: ['category'],
+      select: { category: true },
+    }),
+    prisma.resource.findMany({
+      where: { status: ResourceStatus.ACTIVE, accessType: { not: null } },
+      distinct: ['accessType'],
+      select: { accessType: true },
+    }),
+    prisma.resource.findMany({
+      where: { status: ResourceStatus.ACTIVE, countryCoverage: { not: null } },
+      distinct: ['countryCoverage'],
+      select: { countryCoverage: true },
+    }),
+    prisma.resource.findMany({
+      where: { status: ResourceStatus.ACTIVE, sourceType: { not: null } },
+      distinct: ['sourceType'],
+      select: { sourceType: true },
+    }),
+    prisma.resource.findMany({
+      where: { status: ResourceStatus.ACTIVE, language: { not: null } },
+      distinct: ['language'],
+      select: { language: true },
+    }),
+    prisma.resource.findMany({
+      where: { status: ResourceStatus.ACTIVE, dataGranularity: { not: null } },
+      distinct: ['dataGranularity'],
+      select: { dataGranularity: true },
+    }),
+  ]);
 
   const industries = distinctIndustriesRaw
     .map((r) => r.industry)
@@ -130,20 +179,54 @@ export default async function ResourcesPage(props: PageProps) {
     .filter((v): v is string => Boolean(v))
     .sort();
 
+  const coverages = distinctCoveragesRaw
+    .map((r) => r.countryCoverage)
+    .filter((v): v is string => Boolean(v))
+    .sort();
+
+  const sourceTypes = distinctSourceTypesRaw
+    .map((r) => r.sourceType)
+    .filter((v): v is string => Boolean(v))
+    .sort();
+
+  const languages = distinctLanguagesRaw
+    .map((r) => r.language)
+    .filter((v): v is string => Boolean(v))
+    .sort();
+
+  const granularities = distinctGranularitiesRaw
+    .map((r) => r.dataGranularity)
+    .filter((v): v is string => Boolean(v))
+    .sort();
+
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const currentParamsRecord: Record<string, string | undefined> = {
     q: q || undefined,
     industry: industry || undefined,
     category: category || undefined,
+    coverage: coverage || undefined,
+    sourceType: sourceType || undefined,
     access: access || undefined,
     api: api || undefined,
+    language: language || undefined,
+    granularity: granularity || undefined,
     sort: sort !== 'name' ? sort : undefined,
     direction: direction !== 'asc' ? direction : undefined,
     pageSize: pageSize !== 15 ? String(pageSize) : undefined,
   };
 
-  const hasActiveFilters = Boolean(q || industry || category || access || api);
+  const hasActiveFilters = Boolean(
+    q ||
+    industry ||
+    category ||
+    coverage ||
+    sourceType ||
+    access ||
+    api ||
+    language ||
+    granularity
+  );
 
   return (
     <div className="bg-slate-50 min-h-screen pb-16">
@@ -185,6 +268,10 @@ export default async function ResourcesPage(props: PageProps) {
                 industries={industries}
                 categories={categories}
                 accessTypes={accessTypes}
+                coverages={coverages}
+                sourceTypes={sourceTypes}
+                languages={languages}
+                granularities={granularities}
                 currentParams={currentParamsRecord}
               />
             </div>
@@ -306,6 +393,18 @@ export default async function ResourcesPage(props: PageProps) {
                           <div className="flex items-center gap-1">
                             <span className="text-slate-400">Format:</span>
                             <span className="font-medium text-slate-700">{resource.sourceType}</span>
+                          </div>
+                        )}
+                        {resource.language && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-slate-400">Lang:</span>
+                            <span className="font-medium text-slate-700">{resource.language}</span>
+                          </div>
+                        )}
+                        {resource.dataGranularity && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-slate-400">Granularity:</span>
+                            <span className="font-medium text-slate-700">{resource.dataGranularity}</span>
                           </div>
                         )}
                       </div>
