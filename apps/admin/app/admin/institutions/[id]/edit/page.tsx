@@ -63,7 +63,7 @@ export default async function EditInstitutionPage(props: PageProps) {
 
           <div className='flex items-center gap-3'>
             <Link
-              href={`${process.env.PUBLIC_APP_URL}/institutions/${institution.id}`}
+              href={`${process.env.PUBLIC_APP_URL || 'http://localhost:3000'}/institutions/${institution.id}`}
               target='_blank'
               className='text-xs text-emerald-600 hover:underline'
             >

@@ -33,6 +33,7 @@
     "test:admin-auth": "tsx src/test-admin-auth.ts",
     "test:admin-resource-crud": "tsx src/test-admin-resource-crud.ts",
     "test:admin-institution-management": "tsx src/test-admin-institution-management.ts",
+    "test:admin-resource-link-management": "tsx src/test-admin-resource-link-management.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
