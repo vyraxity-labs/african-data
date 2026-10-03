@@ -263,7 +263,7 @@ export default async function ResourcesPage(props: PageProps) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Sidebar Filters */}
           <aside className="lg:col-span-1">
-            <div className="sticky top-20">
+            <div className="lg:sticky lg:top-20">
               <ResourceFilters
                 industries={industries}
                 categories={categories}
