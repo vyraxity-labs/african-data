@@ -125,19 +125,21 @@ export default async function AdminDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className='border-slate-200'>
-            <CardHeader className='pb-2'>
-              <CardDescription>Institutions</CardDescription>
-              <CardTitle className='text-3xl font-extrabold text-slate-900'>
-                {totalInstitutions}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className='text-xs text-slate-500'>
-                Custodian organizations recorded
-              </span>
-            </CardContent>
-          </Card>
+          <Link href='/admin/institutions' className='block group'>
+            <Card className='border-slate-200 transition-colors group-hover:border-emerald-300'>
+              <CardHeader className='pb-2'>
+                <CardDescription>Institutions</CardDescription>
+                <CardTitle className='text-3xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors'>
+                  {totalInstitutions}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <span className='text-xs text-slate-500'>
+                  Custodian organizations recorded &rarr;
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card className='border-slate-200'>
             <CardHeader className='pb-2'>
