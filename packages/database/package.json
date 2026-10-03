@@ -31,6 +31,7 @@
     "test:public-institution-detail": "tsx src/test-public-institution-detail.ts",
     "test:phase9-search-filtering": "tsx src/test-phase9-search-filtering.ts",
     "test:admin-auth": "tsx src/test-admin-auth.ts",
+    "test:admin-resource-crud": "tsx src/test-admin-resource-crud.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

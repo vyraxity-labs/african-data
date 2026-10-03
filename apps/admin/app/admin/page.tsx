@@ -195,9 +195,9 @@ export default async function AdminDashboardPage() {
                 Manage metadata, link health status verification, and
                 publication controls.
               </p>
-              <Link href='/import'>
+              <Link href='/admin/resources'>
                 <Button variant='outline' className='w-full'>
-                  Manage Records
+                  Manage Records &rarr;
                 </Button>
               </Link>
             </CardContent>
