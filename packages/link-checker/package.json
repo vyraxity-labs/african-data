@@ -15,7 +15,8 @@
     "test:redirect-security": "tsx src/test-redirect-security.ts",
     "test:head-first": "tsx src/test-head-first.ts",
     "test:concurrency": "tsx src/test-concurrency.ts",
-    "test:classification": "tsx src/test-classification.ts"
+    "test:classification": "tsx src/test-classification.ts",
+    "test:batch-config": "tsx src/test-batch-config.ts"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
