@@ -16,11 +16,16 @@
     "test:head-first": "tsx src/test-head-first.ts",
     "test:concurrency": "tsx src/test-concurrency.ts",
     "test:classification": "tsx src/test-classification.ts",
-    "test:batch-config": "tsx src/test-batch-config.ts"
+    "test:batch-config": "tsx src/test-batch-config.ts",
+    "test:due-links": "tsx src/test-due-links.ts"
+  },
+  "dependencies": {
+    "@repo/database": "workspace:*"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
     "@types/node": "^22.13.10",
+    "dotenv": "^18.0.1",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }

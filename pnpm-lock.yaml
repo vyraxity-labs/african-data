@@ -196,6 +196,10 @@ importers:
         version: 5.9.3
 
   packages/link-checker:
+    dependencies:
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
     devDependencies:
       '@repo/config':
         specifier: workspace:*
@@ -203,6 +207,9 @@ importers:
       '@types/node':
         specifier: ^22.13.10
         version: 22.20.4
+      dotenv:
+        specifier: ^18.0.1
+        version: 18.0.1
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
