@@ -10,7 +10,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "tsx src/test-runtime.ts",
-    "test:ssrf": "tsx src/test-ssrf.ts"
+    "test:ssrf": "tsx src/test-ssrf.ts",
+    "test:dns-rebinding": "tsx src/test-dns-rebinding.ts"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
