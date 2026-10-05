@@ -12,7 +12,8 @@
     "test": "tsx src/test-runtime.ts",
     "test:ssrf": "tsx src/test-ssrf.ts",
     "test:dns-rebinding": "tsx src/test-dns-rebinding.ts",
-    "test:redirect-security": "tsx src/test-redirect-security.ts"
+    "test:redirect-security": "tsx src/test-redirect-security.ts",
+    "test:head-first": "tsx src/test-head-first.ts"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
