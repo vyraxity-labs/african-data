@@ -17,7 +17,8 @@
     "test:concurrency": "tsx src/test-concurrency.ts",
     "test:classification": "tsx src/test-classification.ts",
     "test:batch-config": "tsx src/test-batch-config.ts",
-    "test:due-links": "tsx src/test-due-links.ts"
+    "test:due-links": "tsx src/test-due-links.ts",
+    "test:atomic-claim": "tsx src/test-atomic-claim.ts"
   },
   "dependencies": {
     "@repo/database": "workspace:*"
