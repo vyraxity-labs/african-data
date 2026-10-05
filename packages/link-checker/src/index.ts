@@ -7,3 +7,4 @@ export * from './concurrency';
 export * from './classification';
 export * from './batch-config';
 export * from './due-links';
+export * from './atomic-claim';

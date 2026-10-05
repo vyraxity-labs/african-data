@@ -109,6 +109,10 @@ model ResourceLink {
   responseTimeMs        Int?
   errorMessage          String?
 
+  checkLockedUntil      DateTime?
+  checkLockToken        String?
+  checkAttemptedAt      DateTime?
+
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
 
@@ -119,6 +123,7 @@ model ResourceLink {
   @@index([resourceId])
   @@index([status])
   @@index([lastCheckedAt])
+  @@index([checkLockedUntil])
 }
 
 model LinkCheck {
