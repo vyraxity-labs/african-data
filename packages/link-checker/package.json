@@ -9,7 +9,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "tsx src/test-runtime.ts"
+    "test": "tsx src/test-runtime.ts",
+    "test:ssrf": "tsx src/test-ssrf.ts"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
