@@ -6,9 +6,10 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   const isAuthRoute = pathname.startsWith('/api/auth');
+  const isInternalApiRoute = pathname.startsWith('/api/internal/');
   const isLoginPage = pathname === '/admin/login' || pathname === '/login';
 
-  if (isAuthRoute) {
+  if (isAuthRoute || isInternalApiRoute) {
     return NextResponse.next();
   }
 
