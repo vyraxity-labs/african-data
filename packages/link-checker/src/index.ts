@@ -11,3 +11,4 @@ export * from './atomic-claim';
 export * from './process-batch';
 export * from './cron-auth';
 export * from './individual-remediation';
+export * from './redirect-remediation';

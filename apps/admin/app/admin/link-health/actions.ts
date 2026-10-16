@@ -2,7 +2,12 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@repo/database';
-import { claimDueLinksAtomic, processClaimedBatch, remediateLinkIndividual } from '@repo/link-checker';
+import {
+  claimDueLinksAtomic,
+  processClaimedBatch,
+  remediateLinkIndividual,
+  remediateRedirectLink,
+} from '@repo/link-checker';
 import { revalidatePath } from 'next/cache';
 
 export interface ManualCheckResult {
@@ -117,6 +122,49 @@ export async function remediateLinkAction(formData: FormData): Promise<Remediate
     return {
       success: false,
       error: err?.message || 'Failed to remediate link.',
+    };
+  }
+}
+
+/**
+ * Server Action: Adopt detected redirect destination (OLD → 301 → NEW).
+ * Implements Step 15.2 pre-save validation rules.
+ */
+export async function applyRedirectDestinationAction(linkId: string): Promise<RemediateActionResult> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: 'Unauthorized: Administrator authentication required.' };
+  }
+
+  if (!linkId) {
+    return { success: false, error: 'Link ID is required.' };
+  }
+
+  try {
+    const result = await remediateRedirectLink(prisma, {
+      linkId,
+      adminIdentifier: session.user.email || session.user.name || 'admin',
+    });
+
+    revalidatePath('/admin/link-health');
+    revalidatePath('/admin/resources');
+    revalidatePath('/admin');
+
+    return {
+      success: true,
+      linkId: result.linkId,
+      oldUrl: result.oldUrl,
+      newUrl: result.newUrl,
+      statusBefore: result.statusBefore,
+      statusAfter: result.statusAfter,
+      httpStatus: result.httpStatus,
+      responseTimeMs: result.responseTimeMs,
+      message: `Successfully replaced redirect with verified destination: ${result.newUrl} (${result.statusAfter} HTTP ${result.httpStatus || 200}).`,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err?.message || 'Failed to apply redirect destination.',
     };
   }
 }

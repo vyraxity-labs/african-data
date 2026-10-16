@@ -21,7 +21,8 @@
     "test:atomic-claim": "tsx src/test-atomic-claim.ts",
     "test:process-batch": "tsx src/test-process-batch.ts",
     "test:endpoint-security": "tsx src/test-endpoint-security.ts",
-    "test:individual-remediation": "tsx src/test-individual-remediation.ts"
+    "test:individual-remediation": "tsx src/test-individual-remediation.ts",
+    "test:redirect-remediation": "tsx src/test-redirect-remediation.ts"
   },
   "dependencies": {
     "@repo/database": "workspace:*",
