@@ -711,6 +711,7 @@ export default async function AdminLinkHealthDashboard(props: PageProps) {
                               currentUrl={link.url}
                               currentStatus={link.status}
                               resourceName={link.resource.name}
+                              finalUrl={link.finalUrl}
                               audits={link.audits}
                             />
                             <Link href={`/admin/resources/${link.resource.id}`}>

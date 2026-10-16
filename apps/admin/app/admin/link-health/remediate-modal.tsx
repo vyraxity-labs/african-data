@@ -3,13 +3,18 @@
 import * as React from 'react';
 import { useState, useTransition } from 'react';
 import { Button, Dialog, Input, Badge } from '@repo/ui';
-import { remediateLinkAction, RemediateActionResult } from './actions';
+import {
+  remediateLinkAction,
+  applyRedirectDestinationAction,
+  RemediateActionResult,
+} from './actions';
 
 export interface RemediateModalProps {
   linkId: string;
   currentUrl: string;
   currentStatus: string;
   resourceName: string;
+  finalUrl?: string | null;
   audits?: Array<{
     id: string;
     oldUrl: string;
@@ -25,6 +30,7 @@ export function RemediateModal({
   currentUrl,
   currentStatus,
   resourceName,
+  finalUrl,
   audits = [],
 }: RemediateModalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +64,23 @@ export function RemediateModal({
       setResult(res);
 
       if (res.success) {
-        // Automatically close after brief delay to let user see success feedback
+        setTimeout(() => {
+          setIsOpen(false);
+        }, 1500);
+      }
+    });
+  };
+
+  // Step 15.2: [Use Destination] one-click action
+  const handleUseDestination = () => {
+    if (!finalUrl) return;
+
+    startTransition(async () => {
+      setResult(null);
+      const res = await applyRedirectDestinationAction(linkId);
+      setResult(res);
+
+      if (res.success) {
         setTimeout(() => {
           setIsOpen(false);
         }, 1500);
@@ -72,15 +94,19 @@ export function RemediateModal({
         size="sm"
         variant="outline"
         onClick={handleOpen}
-        className="text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-300"
+        className={`text-xs ${
+          currentStatus === 'REDIRECTED'
+            ? 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 border-blue-300'
+            : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-300'
+        }`}
       >
-        Remediate
+        {currentStatus === 'REDIRECTED' ? '↳ Resolve' : 'Remediate'}
       </Button>
 
       <Dialog
         isOpen={isOpen}
         onClose={handleClose}
-        title="Remediate Endpoint Link"
+        title={currentStatus === 'REDIRECTED' ? 'Resolve Redirecting Link' : 'Remediate Endpoint Link'}
         description={`Dataset: ${resourceName}`}
         size="lg"
       >
@@ -88,26 +114,70 @@ export function RemediateModal({
           {/* Current URL Details */}
           <div className="rounded-lg bg-slate-50 p-3 border border-slate-200 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-700">Current URL</span>
-              <Badge variant={currentStatus === 'HEALTHY' ? 'success' : 'danger'} size="sm">
+              <span className="font-semibold text-slate-700">Current URL (OLD)</span>
+              <Badge
+                variant={
+                  currentStatus === 'HEALTHY'
+                    ? 'success'
+                    : currentStatus === 'REDIRECTED'
+                    ? 'info'
+                    : 'danger'
+                }
+                size="sm"
+              >
                 {currentStatus}
               </Badge>
             </div>
             <div className="font-mono text-xs text-slate-800 break-all">{currentUrl}</div>
           </div>
 
+          {/* Step 15.2: Detected Destination Section for Redirects */}
+          {finalUrl && finalUrl !== currentUrl && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50/75 p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between text-xs font-semibold text-blue-950">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-blue-600 font-bold">↳</span> Detected Destination:
+                </span>
+                <Badge variant="info" size="sm">
+                  3xx Redirect Detected
+                </Badge>
+              </div>
+
+              <div className="font-mono text-xs text-blue-900 break-all bg-white p-2.5 rounded border border-blue-200 shadow-2xs font-medium">
+                {finalUrl}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <span className="text-[11px] text-blue-700">
+                  Pre-save rules: Validate NEW &bull; SSRF-check NEW &bull; Check NEW &bull; Save if appropriate
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={isPending}
+                  onClick={handleUseDestination}
+                  className="bg-white hover:bg-blue-100 text-blue-800 border-blue-300 text-xs shrink-0 font-semibold shadow-xs"
+                >
+                  [Use Destination]
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* New URL Input */}
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-800 block">
-              Replacement URL <span className="text-red-500">*</span>
+              {finalUrl && finalUrl !== currentUrl ? 'Or Enter Custom Replacement URL' : 'Replacement URL'}{' '}
+              <span className="text-red-500">*</span>
             </label>
             <Input
               type="url"
-              required
+              required={!finalUrl}
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://example.org/new/dataset/endpoint"
-              helperText="The new URL will be normalized, checked for SSRF, and verified via HEAD/GET before saving."
+              helperText="The replacement URL will be normalized, verified against SSRF, and checked via HEAD/GET prior to saving."
               disabled={isPending}
             />
           </div>
@@ -121,7 +191,7 @@ export function RemediateModal({
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Migrated to HTTPS, Updated open data portal link"
+              placeholder="e.g. Adopted 301 target, Migrated to HTTPS"
               disabled={isPending}
             />
           </div>
@@ -148,7 +218,7 @@ export function RemediateModal({
           {isPending && (
             <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 border border-blue-200 text-xs text-blue-800">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent shrink-0" />
-              <span>Normalizing, verifying SSRF, and checking replacement endpoint...</span>
+              <span>Validating NEW, testing SSRF safety, and executing bounded check...</span>
             </div>
           )}
 
@@ -181,7 +251,7 @@ export function RemediateModal({
               disabled={isPending || !newUrl.trim()}
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
-              {isPending ? 'Verifying & Saving...' : 'Verify & Save Replacement'}
+              {isPending ? 'Verifying & Saving...' : 'Verify & Save Custom URL'}
             </Button>
           </div>
         </form>
