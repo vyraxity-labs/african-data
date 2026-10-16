@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { prisma } from '@repo/database';
-import { claimDueLinksAtomic, processClaimedBatch } from '@repo/link-checker';
+import { claimDueLinksAtomic, processClaimedBatch, remediateLinkIndividual } from '@repo/link-checker';
 import { revalidatePath } from 'next/cache';
 
 export interface ManualCheckResult {
@@ -13,6 +13,19 @@ export interface ManualCheckResult {
   brokenCount: number;
   serverErrorCount: number;
   message: string;
+}
+
+export interface RemediateActionResult {
+  success: boolean;
+  linkId?: string;
+  oldUrl?: string;
+  newUrl?: string;
+  statusBefore?: string;
+  statusAfter?: string;
+  httpStatus?: number | null;
+  responseTimeMs?: number;
+  message?: string;
+  error?: string;
 }
 
 /**
@@ -58,4 +71,52 @@ export async function triggerManualBatchCheck(batchSize = 25): Promise<ManualChe
     serverErrorCount: batchReport.serverError,
     message: `Batch check finished: ${batchReport.totalProcessed} link(s) checked (${batchReport.healthy} healthy, ${batchReport.broken} broken).`,
   };
+}
+
+/**
+ * Server Action: Remediate an individual link URL with normalization, SSRF/HEAD verification, and audit logging.
+ */
+export async function remediateLinkAction(formData: FormData): Promise<RemediateActionResult> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: 'Unauthorized: Administrator authentication required.' };
+  }
+
+  const linkId = formData.get('linkId') as string;
+  const newUrl = formData.get('newUrl') as string;
+  const reason = formData.get('reason') as string | undefined;
+
+  if (!linkId || !newUrl) {
+    return { success: false, error: 'Link ID and replacement URL are required.' };
+  }
+
+  try {
+    const result = await remediateLinkIndividual(prisma, {
+      linkId,
+      newUrl,
+      reason: reason || 'INDIVIDUAL_REMEDIATION',
+      adminIdentifier: session.user.email || session.user.name || 'admin',
+    });
+
+    revalidatePath('/admin/link-health');
+    revalidatePath('/admin/resources');
+    revalidatePath('/admin');
+
+    return {
+      success: true,
+      linkId: result.linkId,
+      oldUrl: result.oldUrl,
+      newUrl: result.newUrl,
+      statusBefore: result.statusBefore,
+      statusAfter: result.statusAfter,
+      httpStatus: result.httpStatus,
+      responseTimeMs: result.responseTimeMs,
+      message: `Successfully remediated endpoint: Status is now ${result.statusAfter}${result.httpStatus ? ` (HTTP ${result.httpStatus})` : ''}.`,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err?.message || 'Failed to remediate link.',
+    };
+  }
 }
