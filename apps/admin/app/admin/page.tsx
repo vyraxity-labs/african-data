@@ -62,6 +62,11 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className='flex items-center gap-3'>
+            <Link href='/admin/link-health'>
+              <Button size='sm' variant='outline'>
+                Link Health
+              </Button>
+            </Link>
             <Link href='/import'>
               <Button size='sm' variant='outline'>
                 CSV Ingestion
@@ -141,19 +146,21 @@ export default async function AdminDashboardPage() {
             </Card>
           </Link>
 
-          <Card className='border-slate-200'>
-            <CardHeader className='pb-2'>
-              <CardDescription>Registered Endpoints</CardDescription>
-              <CardTitle className='text-3xl font-extrabold text-slate-900'>
-                {totalLinks}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className='text-xs text-slate-500'>
-                APIs, data portals, and downloads
-              </span>
-            </CardContent>
-          </Card>
+          <Link href='/admin/link-health' className='block group'>
+            <Card className='border-slate-200 transition-colors group-hover:border-emerald-300'>
+              <CardHeader className='pb-2'>
+                <CardDescription>Registered Endpoints</CardDescription>
+                <CardTitle className='text-3xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors'>
+                  {totalLinks}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <span className='text-xs text-slate-500'>
+                  Health monitoring & audits &rarr;
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* Operation Modules */}
