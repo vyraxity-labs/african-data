@@ -7,6 +7,11 @@ import {
   processClaimedBatch,
   remediateLinkIndividual,
   remediateRedirectLink,
+  parseReplacementCsv,
+  previewBatchReplacement,
+  applyBatchReplacement,
+  BatchPreviewSummary,
+  BatchApplyResult,
 } from '@repo/link-checker';
 import { revalidatePath } from 'next/cache';
 
@@ -166,5 +171,56 @@ export async function applyRedirectDestinationAction(linkId: string): Promise<Re
       success: false,
       error: err?.message || 'Failed to apply redirect destination.',
     };
+  }
+}
+
+/**
+ * Server Action: Validates and dry-runs a batch replacement CSV.
+ */
+export async function previewBatchReplacementAction(
+  csvContent: string
+): Promise<{ success: boolean; preview?: BatchPreviewSummary; error?: string }> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: 'Unauthorized: Administrator authentication required.' };
+  }
+
+  try {
+    const rows = parseReplacementCsv(csvContent);
+    const preview = await previewBatchReplacement(prisma, rows);
+    return { success: true, preview };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to parse replacement CSV.' };
+  }
+}
+
+/**
+ * Server Action: Transactionally applies a verified batch replacement CSV.
+ * Enforces all-or-nothing execution.
+ */
+export async function applyBatchReplacementAction(
+  csvContent: string,
+  reason?: string
+): Promise<{ success: boolean; result?: BatchApplyResult; error?: string }> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: 'Unauthorized: Administrator authentication required.' };
+  }
+
+  try {
+    const rows = parseReplacementCsv(csvContent);
+    const result = await applyBatchReplacement(prisma, {
+      rows,
+      adminIdentifier: session.user.email || session.user.name || 'admin',
+      reason: reason || 'BATCH_REPLACEMENT',
+    });
+
+    revalidatePath('/admin/link-health');
+    revalidatePath('/admin/resources');
+    revalidatePath('/admin');
+
+    return { success: true, result };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to apply batch replacement.' };
   }
 }

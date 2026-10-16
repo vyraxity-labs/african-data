@@ -21,6 +21,7 @@ import {
 } from '@repo/ui'
 import { ManualCheckButton } from './manual-check-button'
 import { RemediateModal } from './remediate-modal'
+import { BatchReplaceModal } from './batch-replace-modal'
 
 export const dynamic = 'force-dynamic'
 
@@ -285,7 +286,10 @@ export default async function AdminLinkHealthDashboard(props: PageProps) {
             </Badge>
           </div>
 
-          <ManualCheckButton />
+          <div className="flex items-center gap-2.5">
+            <BatchReplaceModal />
+            <ManualCheckButton />
+          </div>
         </div>
       </header>
 

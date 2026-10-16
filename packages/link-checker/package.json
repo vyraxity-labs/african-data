@@ -22,11 +22,13 @@
     "test:process-batch": "tsx src/test-process-batch.ts",
     "test:endpoint-security": "tsx src/test-endpoint-security.ts",
     "test:individual-remediation": "tsx src/test-individual-remediation.ts",
-    "test:redirect-remediation": "tsx src/test-redirect-remediation.ts"
+    "test:redirect-remediation": "tsx src/test-redirect-remediation.ts",
+    "test:batch-remediation": "tsx src/test-batch-remediation.ts"
   },
   "dependencies": {
     "@repo/database": "workspace:*",
-    "@repo/validation": "workspace:*"
+    "@repo/validation": "workspace:*",
+    "csv-parse": "^7.0.2"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
