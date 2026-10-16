@@ -20,6 +20,7 @@ import {
   EmptyState,
 } from '@repo/ui'
 import { ManualCheckButton } from './manual-check-button'
+import { RemediateModal } from './remediate-modal'
 
 export const dynamic = 'force-dynamic'
 
@@ -225,6 +226,10 @@ export default async function AdminLinkHealthDashboard(props: PageProps) {
             name: true,
             status: true,
           },
+        },
+        audits: {
+          orderBy: { createdAt: 'desc' },
+          take: 5,
         },
       },
     }),
@@ -700,15 +705,24 @@ export default async function AdminLinkHealthDashboard(props: PageProps) {
 
                         {/* Actions */}
                         <TableCell className='text-right'>
-                          <Link href={`/admin/resources/${link.resource.id}`}>
-                            <Button
-                              size='sm'
-                              variant='ghost'
-                              className='text-slate-600 hover:text-emerald-700 text-xs'
-                            >
-                              Manage
-                            </Button>
-                          </Link>
+                          <div className='flex items-center justify-end gap-1.5'>
+                            <RemediateModal
+                              linkId={link.id}
+                              currentUrl={link.url}
+                              currentStatus={link.status}
+                              resourceName={link.resource.name}
+                              audits={link.audits}
+                            />
+                            <Link href={`/admin/resources/${link.resource.id}`}>
+                              <Button
+                                size='sm'
+                                variant='ghost'
+                                className='text-slate-600 hover:text-emerald-700 text-xs'
+                              >
+                                Manage
+                              </Button>
+                            </Link>
+                          </div>
                         </TableCell>
                       </TableRow>
                     )

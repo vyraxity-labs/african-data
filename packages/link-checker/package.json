@@ -20,10 +20,12 @@
     "test:due-links": "tsx src/test-due-links.ts",
     "test:atomic-claim": "tsx src/test-atomic-claim.ts",
     "test:process-batch": "tsx src/test-process-batch.ts",
-    "test:endpoint-security": "tsx src/test-endpoint-security.ts"
+    "test:endpoint-security": "tsx src/test-endpoint-security.ts",
+    "test:individual-remediation": "tsx src/test-individual-remediation.ts"
   },
   "dependencies": {
-    "@repo/database": "workspace:*"
+    "@repo/database": "workspace:*",
+    "@repo/validation": "workspace:*"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",

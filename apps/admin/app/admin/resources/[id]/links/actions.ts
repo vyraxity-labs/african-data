@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { prisma, LinkType } from '@repo/database';
 import { normalizeUrl, InvalidUrlError } from '@repo/validation';
+import { remediateLinkIndividual } from '@repo/link-checker';
 
 export interface LinkActionState {
   error?: string;
@@ -93,21 +94,18 @@ export async function updateResourceLink(
   formData: FormData
 ): Promise<LinkActionState> {
   try {
-    await assertAdmin();
+    const user = await assertAdmin();
 
     const rawUrl = (formData.get('url') as string)?.trim();
     if (!rawUrl) {
       return { error: 'URL is required.' };
     }
 
-    let url: string;
-    try {
-      url = normalizeUrl(rawUrl);
-    } catch (err) {
-      if (err instanceof InvalidUrlError) {
-        return { error: `Invalid URL: ${err.message}` };
-      }
-      return { error: 'Invalid URL format.' };
+    const currentLink = await prisma.resourceLink.findUnique({
+      where: { id: linkId },
+    });
+    if (!currentLink) {
+      return { error: 'Link endpoint not found.' };
     }
 
     const linkTypeStr = (formData.get('linkType') as string)?.toUpperCase();
@@ -116,29 +114,26 @@ export async function updateResourceLink(
     }
     const linkType = linkTypeStr as LinkType;
 
-    // Check conflict with another link on the same resource
-    const existing = await prisma.resourceLink.findFirst({
-      where: {
-        resourceId,
-        url,
-        id: { not: linkId },
-      },
-    });
-
-    if (existing) {
-      return { error: 'Another endpoint on this dataset already uses this URL.' };
-    }
-
-    await prisma.resourceLink.update({
-      where: { id: linkId },
-      data: {
-        url,
+    // If URL is being replaced, route through individual remediation engine (Normalize -> Validate -> Check -> Save -> Audit)
+    if (rawUrl !== currentLink.url) {
+      await remediateLinkIndividual(prisma, {
+        linkId,
+        newUrl: rawUrl,
         linkType,
-      },
-    });
+        reason: (formData.get('reason') as string) || 'MANUAL_EDIT',
+        adminIdentifier: user.email || 'admin',
+      });
+    } else {
+      // Only linkType changed
+      await prisma.resourceLink.update({
+        where: { id: linkId },
+        data: { linkType },
+      });
+    }
 
     revalidatePath(`/admin/resources/${resourceId}/edit`);
     revalidatePath(`/admin/resources/${resourceId}/links`);
+    revalidatePath(`/admin/link-health`);
     revalidatePath(`/resources/${resourceId}`);
     return { success: true };
   } catch (error: any) {
