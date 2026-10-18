@@ -23,7 +23,8 @@
     "test:endpoint-security": "tsx src/test-endpoint-security.ts",
     "test:individual-remediation": "tsx src/test-individual-remediation.ts",
     "test:redirect-remediation": "tsx src/test-redirect-remediation.ts",
-    "test:batch-remediation": "tsx src/test-batch-remediation.ts"
+    "test:batch-remediation": "tsx src/test-batch-remediation.ts",
+    "test:link-history": "tsx src/test-link-history.ts"
   },
   "dependencies": {
     "@repo/database": "workspace:*",

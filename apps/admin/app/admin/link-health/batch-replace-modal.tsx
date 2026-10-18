@@ -6,8 +6,8 @@ import { Button, Dialog, Badge, Table, TableHeader, TableBody, TableRow, TableHe
 import {
   previewBatchReplacementAction,
   applyBatchReplacementAction,
+  type BatchPreviewSummary,
 } from './actions';
-import type { BatchPreviewSummary } from '@repo/link-checker';
 
 const SAMPLE_CSV = `link_id,new_url
 cmv1234567890,https://data.example.org/v2/indicators.csv

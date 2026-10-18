@@ -13,6 +13,7 @@ export type LinkType =
 
 import { Input, Select, Button, Badge } from '@repo/ui';
 import { addResourceLink, updateResourceLink, deleteResourceLink, LinkActionState } from './actions';
+import { LinkHistoryModal } from '../../../link-health/link-history-modal';
 
 interface LinkItem {
   id: string;
@@ -106,6 +107,11 @@ export function ResourceLinksManager({ resourceId, links }: ResourceLinksManager
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      <LinkHistoryModal
+                        linkId={link.id}
+                        url={link.url}
+                        currentStatus={link.status}
+                      />
                       <Button
                         size="sm"
                         variant="ghost"

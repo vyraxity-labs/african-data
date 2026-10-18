@@ -13,3 +13,4 @@ export * from './cron-auth';
 export * from './individual-remediation';
 export * from './redirect-remediation';
 export * from './batch-remediation';
+export * from './link-history';
