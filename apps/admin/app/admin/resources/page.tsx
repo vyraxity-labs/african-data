@@ -120,7 +120,17 @@ export default async function AdminResourcesPage(props: PageProps) {
             <span className="text-sm font-bold text-slate-900">Resource Datasets</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <a
+              href={`/api/resources/export${statusFilter !== 'ALL' || q ? `?status=${statusFilter}&q=${encodeURIComponent(q)}` : ''}`}
+              download="african-data-catalogue-admin.csv"
+              title="Export catalogue dataset entries with lifecycle states"
+            >
+              <Button size="sm" variant="outline" className="flex items-center gap-1.5 text-slate-700">
+                <span>📥</span>
+                <span>Export CSV</span>
+              </Button>
+            </a>
             <Link href="/admin/resources/new">
               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
                 + Create Resource

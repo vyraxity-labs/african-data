@@ -249,6 +249,22 @@ export default async function ResourcesPage(props: PageProps) {
             </div>
 
             <div className="flex items-center gap-2">
+              <a
+                href={`/api/export/csv${
+                  Object.entries(currentParamsRecord).filter(([k, v]) => v && k !== 'pageSize' && k !== 'sort' && k !== 'direction').length > 0
+                    ? `?${new URLSearchParams(
+                        Object.entries(currentParamsRecord).filter(([k, v]) => v && k !== 'pageSize' && k !== 'sort' && k !== 'direction') as [string, string][]
+                      ).toString()}`
+                    : ''
+                }`}
+                download="african-data-catalogue.csv"
+                title="Download catalogue dataset information in CSV format"
+              >
+                <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-slate-700">
+                  <span>📥</span>
+                  <span>Export CSV</span>
+                </Button>
+              </a>
               <Link href="/">
                 <Button variant="outline" size="sm">
                   &larr; Back to Home
