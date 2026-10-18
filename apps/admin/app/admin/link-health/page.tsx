@@ -22,6 +22,7 @@ import {
 import { ManualCheckButton } from './manual-check-button'
 import { RemediateModal } from './remediate-modal'
 import { BatchReplaceModal } from './batch-replace-modal'
+import { LinkHistoryModal } from './link-history-modal'
 
 export const dynamic = 'force-dynamic'
 
@@ -286,7 +287,7 @@ export default async function AdminLinkHealthDashboard(props: PageProps) {
             </Badge>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className='flex items-center gap-2.5'>
             <BatchReplaceModal />
             <ManualCheckButton />
           </div>
@@ -710,6 +711,12 @@ export default async function AdminLinkHealthDashboard(props: PageProps) {
                         {/* Actions */}
                         <TableCell className='text-right'>
                           <div className='flex items-center justify-end gap-1.5'>
+                            <LinkHistoryModal
+                              linkId={link.id}
+                              url={link.url}
+                              currentStatus={link.status}
+                              resourceName={link.resource.name}
+                            />
                             <RemediateModal
                               linkId={link.id}
                               currentUrl={link.url}

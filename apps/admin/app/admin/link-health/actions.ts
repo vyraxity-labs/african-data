@@ -10,10 +10,22 @@ import {
   parseReplacementCsv,
   previewBatchReplacement,
   applyBatchReplacement,
+  getLinkHistory,
   BatchPreviewSummary,
   BatchApplyResult,
+  LinkHistoryResult,
+  LinkCheckHistoryEntry,
+  LinkAuditHistoryEntry,
 } from '@repo/link-checker';
 import { revalidatePath } from 'next/cache';
+
+export type {
+  BatchPreviewSummary,
+  BatchApplyResult,
+  LinkHistoryResult,
+  LinkCheckHistoryEntry,
+  LinkAuditHistoryEntry,
+};
 
 export interface ManualCheckResult {
   success: boolean;
@@ -222,5 +234,32 @@ export async function applyBatchReplacementAction(
     return { success: true, result };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to apply batch replacement.' };
+  }
+}
+
+/**
+ * Server Action: Fetches complete historical checks and URL audits for a specific link.
+ * Implements Phase 16 Link History.
+ */
+export async function getLinkHistoryAction(
+  linkId: string
+): Promise<{ success: boolean; history?: LinkHistoryResult; error?: string }> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: 'Unauthorized: Administrator authentication required.' };
+  }
+
+  if (!linkId) {
+    return { success: false, error: 'Link ID is required.' };
+  }
+
+  try {
+    const history = await getLinkHistory(prisma, linkId);
+    if (!history) {
+      return { success: false, error: 'Link not found.' };
+    }
+    return { success: true, history };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to fetch link history.' };
   }
 }
