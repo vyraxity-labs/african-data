@@ -35,6 +35,7 @@
     "test:admin-institution-management": "tsx src/test-admin-institution-management.ts",
     "test:admin-resource-link-management": "tsx src/test-admin-resource-link-management.ts",
     "test:audit": "tsx src/test-audit-log.ts",
+    "test:performance": "tsx src/performance/run-benchmark.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

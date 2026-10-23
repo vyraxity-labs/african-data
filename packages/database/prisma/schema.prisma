@@ -70,6 +70,10 @@ model Resource {
   @@index([language])
   @@index([dataGranularity])
   @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@index([updatedAt(sort: Desc)])
+  @@index([status, name])
+  @@index([status, createdAt(sort: Desc)])
 }
 
 enum LinkType {
@@ -125,6 +129,8 @@ model ResourceLink {
   @@index([status])
   @@index([lastCheckedAt])
   @@index([checkLockedUntil])
+  @@index([lastCheckedAt, checkLockedUntil])
+  @@index([status, lastCheckedAt])
 }
 
 model LinkAudit {
