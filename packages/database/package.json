@@ -37,6 +37,7 @@
     "test:audit": "tsx src/test-audit-log.ts",
     "test:performance": "tsx src/performance/run-benchmark.ts",
     "test:prisma-postgres": "tsx src/test-prisma-postgres-config.ts",
+    "test:step22-1": "tsx src/test-step22-1-public-deployment.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
