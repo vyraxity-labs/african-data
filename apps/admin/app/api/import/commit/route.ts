@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     // 3. Commit transaction
     const commitResult = await commitImport(normalized.records, {
-      defaultStatus: ResourceStatus.ACTIVE,
+      defaultStatus: ResourceStatus.DRAFT,
       skipDuplicates: true,
       batchSize: 25,
     });
