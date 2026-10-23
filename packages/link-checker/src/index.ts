@@ -14,3 +14,4 @@ export * from './individual-remediation';
 export * from './redirect-remediation';
 export * from './batch-remediation';
 export * from './link-history';
+export * from './data-quality';

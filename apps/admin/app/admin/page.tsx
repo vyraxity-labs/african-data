@@ -62,6 +62,11 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className='flex items-center gap-3'>
+            <Link href='/admin/data-quality'>
+              <Button size='sm' variant='outline'>
+                Data Quality
+              </Button>
+            </Link>
             <Link href='/admin/link-health'>
               <Button size='sm' variant='outline'>
                 Link Health
@@ -164,12 +169,12 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Operation Modules */}
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
           <Card className='border-slate-200'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <span className='text-xl'>📥</span>
-                <CardTitle>Batch CSV Import Pipeline</CardTitle>
+                <CardTitle>Batch CSV Ingestion</CardTitle>
               </div>
               <CardDescription>
                 Upload, security-scan, validate, and atomically commit
@@ -183,7 +188,7 @@ export default async function AdminDashboardPage() {
               </p>
               <Link href='/import'>
                 <Button className='w-full bg-emerald-600 hover:bg-emerald-700'>
-                  Launch Ingestion Wizard &rarr;
+                  Launch Wizard &rarr;
                 </Button>
               </Link>
             </CardContent>
@@ -193,7 +198,7 @@ export default async function AdminDashboardPage() {
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <span className='text-xl'>🔍</span>
-                <CardTitle>Catalogue Lifecycle & Quality</CardTitle>
+                <CardTitle>Catalogue Lifecycle</CardTitle>
               </div>
               <CardDescription>
                 Manage resource lifecycle states: Draft, Active, and Archived.
@@ -207,6 +212,28 @@ export default async function AdminDashboardPage() {
               <Link href='/admin/resources'>
                 <Button variant='outline' className='w-full'>
                   Manage Records &rarr;
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className='border-slate-200'>
+            <CardHeader>
+              <div className='flex items-center gap-2'>
+                <span className='text-xl'>📊</span>
+                <CardTitle>Data Quality & Audits</CardTitle>
+              </div>
+              <CardDescription>
+                Duplicate detection, missing-field reports, stale verifications, and orphan audits.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <p className='text-xs text-slate-600 leading-relaxed'>
+                Flag potential duplicates for review, audit completeness, and track stale endpoints.
+              </p>
+              <Link href='/admin/data-quality'>
+                <Button variant='outline' className='w-full text-emerald-700 hover:text-emerald-800'>
+                  View Quality Reports &rarr;
                 </Button>
               </Link>
             </CardContent>
