@@ -192,3 +192,32 @@ model CustomFieldDefinition {
   @@index([filterable])
   @@index([searchable])
 }
+
+
+enum AuditAction {
+  CREATE_RESOURCE
+  UPDATE_RESOURCE
+  ARCHIVE_RESOURCE
+  CREATE_LINK
+  UPDATE_LINK
+  REPLACE_LINK
+  BULK_REPLACE_LINKS
+  CSV_IMPORT
+  RESOURCE_STATUS_CHANGE
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  actor     String
+  action    AuditAction
+  entity    String
+  entityId  String
+  timestamp DateTime    @default(now())
+  before    Json?
+  after     Json?
+
+  @@index([action])
+  @@index([entity, entityId])
+  @@index([actor])
+  @@index([timestamp])
+}

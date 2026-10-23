@@ -22,7 +22,7 @@ import { normalizeUrl, InvalidUrlError } from '@repo/validation';
 import { executeHeadFirstCheck, HeadFirstCheckResult } from './head-first';
 import { classifyLinkStatus } from './classification';
 import { SsrfBlockedError } from './ssrf';
-import { LinkHealthStatus, LinkType } from '@repo/database';
+import { LinkHealthStatus, LinkType, AuditAction } from '@repo/database';
 
 export interface RedirectRemediationInput {
   linkId: string;
@@ -226,6 +226,25 @@ export async function remediateRedirectLink(
         checkLockedUntil: null,
         checkLockToken: null,
         updatedAt: now,
+      },
+    });
+
+    // Track REPLACE_LINK in general AuditLog
+    await tx.auditLog.create({
+      data: {
+        actor: adminIdentifier || 'admin',
+        action: AuditAction.REPLACE_LINK,
+        entity: 'ResourceLink',
+        entityId: existingLink.id,
+        before: {
+          url: existingLink.url,
+          status: existingLink.status,
+        },
+        after: {
+          url: normalizedNew,
+          status: classification.status,
+          reason: 'REDIRECT_DESTINATION_ADOPTED',
+        },
       },
     });
 

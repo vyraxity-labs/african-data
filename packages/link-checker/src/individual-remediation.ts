@@ -26,7 +26,7 @@ import { normalizeUrl, InvalidUrlError } from '@repo/validation';
 import { executeHeadFirstCheck, HeadFirstCheckResult } from './head-first';
 import { classifyLinkStatus } from './classification';
 import { SsrfBlockedError } from './ssrf';
-import { LinkHealthStatus, LinkType } from '@repo/database';
+import { LinkHealthStatus, LinkType, AuditAction } from '@repo/database';
 
 export interface IndividualRemediationInput {
   linkId: string;
@@ -199,6 +199,27 @@ export async function remediateLinkIndividual(
         checkLockedUntil: null,
         checkLockToken: null,
         updatedAt: now,
+      },
+    });
+
+    // 5d. Track REPLACE_LINK in general AuditLog
+    await tx.auditLog.create({
+      data: {
+        actor: adminIdentifier || 'admin',
+        action: AuditAction.REPLACE_LINK,
+        entity: 'ResourceLink',
+        entityId: existingLink.id,
+        before: {
+          url: existingLink.url,
+          status: existingLink.status,
+          linkType: existingLink.linkType,
+        },
+        after: {
+          url: normalizedNewUrl,
+          status: classification.status,
+          linkType: linkType || existingLink.linkType,
+          reason: reason || 'INDIVIDUAL_REPLACEMENT',
+        },
       },
     });
 

@@ -23,7 +23,7 @@
 
 import { parse } from 'csv-parse/sync';
 import { normalizeUrl, InvalidUrlError } from '@repo/validation';
-import { LinkHealthStatus } from '@repo/database';
+import { LinkHealthStatus, AuditAction } from '@repo/database';
 
 export interface ParsedReplacementRow {
   rowNumber: number;
@@ -346,6 +346,27 @@ export async function applyBatchReplacement(
           updatedAt: now,
         },
       });
+
+      // Track BULK_REPLACE_LINKS in general AuditLog
+      if (tx.auditLog) {
+        await tx.auditLog.create({
+          data: {
+            actor: adminIdentifier,
+            action: AuditAction.BULK_REPLACE_LINKS,
+            entity: 'ResourceLink',
+            entityId: item.linkId,
+            before: {
+              url: item.oldUrl,
+              datasetId: item.datasetId,
+              datasetName: item.datasetName,
+            },
+            after: {
+              url: item.normalizedNewUrl,
+              reason,
+            },
+          },
+        });
+      }
     }
   });
 

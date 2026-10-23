@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import {
+  prisma,
   validateCsvSecurity,
   parseCsv,
   normalizeCsvRecords,
   commitImport,
   ResourceStatus,
+  recordAuditLog,
+  AuditAction,
 } from '@repo/database';
 
 export async function POST(request: Request) {
@@ -62,6 +65,26 @@ export async function POST(request: Request) {
       skipDuplicates: true,
       batchSize: 25,
     });
+
+    // 4. Audit log for CSV_IMPORT
+    if (commitResult.success) {
+      const actor = session.user.email || session.user.name || 'admin';
+      await recordAuditLog(prisma, {
+        actor,
+        action: AuditAction.CSV_IMPORT,
+        entity: 'Resource',
+        entityId: `csv-import-${Date.now()}`,
+        after: {
+          fileName: file.name,
+          totalProcessed: commitResult.totalProcessed,
+          resourcesCreated: commitResult.resourcesCreated,
+          institutionsCreated: commitResult.institutionsCreated,
+          linksCreated: commitResult.linksCreated,
+          skippedDuplicates: commitResult.skippedDuplicates,
+          errorCount: commitResult.errors.length,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: commitResult.success,
