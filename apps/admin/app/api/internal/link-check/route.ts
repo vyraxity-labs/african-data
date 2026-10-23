@@ -20,7 +20,7 @@ export const runtime = 'nodejs'; // Requirement 12.1: strictly Node.js runtime
  * - Records LinkCheck entries and updates ResourceLink states
  * - Returns structured execution report
  */
-export async function POST(req: NextRequest) {
+async function handleLinkCheck(req: NextRequest, customConfig?: any) {
   const authHeader = req.headers.get('authorization');
   const cronSecretHeader = req.headers.get('x-cron-secret');
 
@@ -37,25 +37,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    let body: any = {};
-    try {
-      body = await req.json();
-    } catch {
-      // Body is optional
-    }
-
     const config = resolveBatchConfig({
-      batchSize: body?.batchSize,
-      timeoutMs: body?.timeoutMs,
-      maxConcurrentPerHost: body?.maxConcurrentPerHost,
-      globalMaxConcurrency: body?.globalMaxConcurrency,
-      maxRedirects: body?.maxRedirects,
+      batchSize: customConfig?.batchSize,
+      timeoutMs: customConfig?.timeoutMs,
+      maxConcurrentPerHost: customConfig?.maxConcurrentPerHost,
+      globalMaxConcurrency: customConfig?.globalMaxConcurrency,
+      maxRedirects: customConfig?.maxRedirects,
     });
 
     // 1. Claim batch of due links atomically
     const claimResult = await claimDueLinksAtomic(prisma, {
       batchSize: config.batchSize,
-      resourceId: body?.resourceId,
+      resourceId: customConfig?.resourceId,
     });
 
     if (claimResult.claimedCount === 0) {
@@ -93,14 +86,37 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * Reject GET requests to prevent accidental pre-fetching or crawlers from triggering batches.
+ * Scheduled Link Health Check Endpoint (POST)
+ * Used by external schedulers (e.g. GitHub Actions, QStash, Cloudflare Cron Triggers)
+ * allowing custom batch configuration in the JSON body.
  */
-export async function GET() {
-  return NextResponse.json(
-    {
-      error: 'Method Not Allowed',
-      message: 'Scheduled link checks must be invoked via POST with Authorization: Bearer <CRON_SECRET>.',
-    },
-    { status: 405 }
-  );
+export async function POST(req: NextRequest) {
+  let body: any = {};
+  try {
+    body = await req.json();
+  } catch {
+    // Body is optional
+  }
+  return handleLinkCheck(req, body);
+}
+
+/**
+ * Scheduled Link Health Check Endpoint (GET)
+ * Used by native Vercel Cron Jobs, which issue GET requests with Authorization: Bearer <CRON_SECRET>.
+ * Query params (e.g. ?batchSize=50) are supported optionally.
+ */
+export async function GET(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const batchSizeParam = searchParams.get('batchSize');
+  const timeoutMsParam = searchParams.get('timeoutMs');
+
+  const configOverrides: any = {};
+  if (batchSizeParam && !isNaN(Number(batchSizeParam))) {
+    configOverrides.batchSize = Number(batchSizeParam);
+  }
+  if (timeoutMsParam && !isNaN(Number(timeoutMsParam))) {
+    configOverrides.timeoutMs = Number(timeoutMsParam);
+  }
+
+  return handleLinkCheck(req, configOverrides);
 }
