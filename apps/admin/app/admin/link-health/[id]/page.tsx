@@ -117,7 +117,7 @@ export default async function LinkHistoryPage(props: PageProps) {
                 <CardDescription>
                   Attached to dataset{' '}
                   <Link
-                    href={`/admin/resources/${link.resource.id}`}
+                    href={`/admin/resources/${link.resource.id}/edit`}
                     className="font-medium text-emerald-700 hover:underline"
                   >
                     {link.resource.name}

@@ -725,7 +725,7 @@ export default async function AdminLinkHealthDashboard(props: PageProps) {
                               finalUrl={link.finalUrl}
                               audits={link.audits}
                             />
-                            <Link href={`/admin/resources/${link.resource.id}`}>
+                            <Link href={`/admin/resources/${link.resource.id}/edit`}>
                               <Button
                                 size='sm'
                                 variant='ghost'
