@@ -24,7 +24,8 @@
     "test:individual-remediation": "tsx src/test-individual-remediation.ts",
     "test:redirect-remediation": "tsx src/test-redirect-remediation.ts",
     "test:batch-remediation": "tsx src/test-batch-remediation.ts",
-    "test:link-history": "tsx src/test-link-history.ts"
+    "test:link-history": "tsx src/test-link-history.ts",
+    "test:data-quality": "tsx src/test-data-quality.ts"
   },
   "dependencies": {
     "@repo/database": "workspace:*",
