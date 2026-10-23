@@ -29,12 +29,14 @@ export default async function AdminDashboardPage() {
     draftResources,
     totalInstitutions,
     totalLinks,
+    totalAuditLogs,
   ] = await Promise.all([
     prisma.resource.count(),
     prisma.resource.count({ where: { status: ResourceStatus.ACTIVE } }),
     prisma.resource.count({ where: { status: ResourceStatus.DRAFT } }),
     prisma.institution.count(),
     prisma.resourceLink.count(),
+    prisma.auditLog?.count() ?? 0,
   ])
 
   return (
@@ -62,6 +64,11 @@ export default async function AdminDashboardPage() {
           </div>
 
           <div className='flex items-center gap-3'>
+            <Link href='/admin/audit-logs'>
+              <Button size='sm' variant='outline'>
+                Audit Log
+              </Button>
+            </Link>
             <Link href='/admin/data-quality'>
               <Button size='sm' variant='outline'>
                 Data Quality
@@ -100,12 +107,12 @@ export default async function AdminDashboardPage() {
           </h1>
           <p className='mt-1 text-sm text-slate-500'>
             Authenticated administrative control center for datasets,
-            institutions, link health, and data ingestion.
+            institutions, link health, data quality, and audit logging.
           </p>
         </div>
 
         {/* Live Metrics Grid */}
-        <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4'>
+        <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5'>
           <Card className='border-slate-200'>
             <CardHeader className='pb-2'>
               <CardDescription>Total Catalogued</CardDescription>
@@ -166,15 +173,31 @@ export default async function AdminDashboardPage() {
               </CardContent>
             </Card>
           </Link>
+
+          <Link href='/admin/audit-logs' className='block group'>
+            <Card className='border-slate-200 transition-colors group-hover:border-emerald-300'>
+              <CardHeader className='pb-2'>
+                <CardDescription>Audit Events</CardDescription>
+                <CardTitle className='text-3xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors'>
+                  {totalAuditLogs}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <span className='text-xs text-slate-500'>
+                  Administrative actions tracked &rarr;
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* Operation Modules */}
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
           <Card className='border-slate-200'>
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <span className='text-xl'>📥</span>
-                <CardTitle>Batch CSV Ingestion</CardTitle>
+                <CardTitle>CSV Ingestion</CardTitle>
               </div>
               <CardDescription>
                 Upload, security-scan, validate, and atomically commit
@@ -221,10 +244,10 @@ export default async function AdminDashboardPage() {
             <CardHeader>
               <div className='flex items-center gap-2'>
                 <span className='text-xl'>📊</span>
-                <CardTitle>Data Quality & Audits</CardTitle>
+                <CardTitle>Data Quality</CardTitle>
               </div>
               <CardDescription>
-                Duplicate detection, missing-field reports, stale verifications, and orphan audits.
+                Duplicate detection, missing fields, stale verifications, and orphan audits.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -233,7 +256,29 @@ export default async function AdminDashboardPage() {
               </p>
               <Link href='/admin/data-quality'>
                 <Button variant='outline' className='w-full text-emerald-700 hover:text-emerald-800'>
-                  View Quality Reports &rarr;
+                  Quality Reports &rarr;
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className='border-slate-200'>
+            <CardHeader>
+              <div className='flex items-center gap-2'>
+                <span className='text-xl'>📜</span>
+                <CardTitle>Audit Trail</CardTitle>
+              </div>
+              <CardDescription>
+                Chronological record of administrative operations, link replacements, and ingestions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <p className='text-xs text-slate-600 leading-relaxed'>
+                Full provenance tracking with before/after state diffs and secret scrub guarantees.
+              </p>
+              <Link href='/admin/audit-logs'>
+                <Button variant='outline' className='w-full'>
+                  View Audit Trail &rarr;
                 </Button>
               </Link>
             </CardContent>

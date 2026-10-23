@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
-import { prisma, LinkType } from '@repo/database';
+import { prisma, LinkType, AuditAction, recordAuditLog } from '@repo/database';
 import { normalizeUrl, InvalidUrlError } from '@repo/validation';
 import { remediateLinkIndividual } from '@repo/link-checker';
 
@@ -31,7 +31,7 @@ export async function addResourceLink(
   formData: FormData
 ): Promise<LinkActionState> {
   try {
-    await assertAdmin();
+    const user = await assertAdmin();
 
     const rawUrl = (formData.get('url') as string)?.trim();
     if (!rawUrl) {
@@ -66,11 +66,26 @@ export async function addResourceLink(
       return { error: 'This URL is already attached to this dataset.' };
     }
 
-    await prisma.resourceLink.create({
+    const newLink = await prisma.resourceLink.create({
       data: {
         resourceId,
         url,
         linkType,
+      },
+    });
+
+    // Track CREATE_LINK in AuditLog
+    await recordAuditLog(prisma, {
+      actor: user.email || user.name || 'admin',
+      action: AuditAction.CREATE_LINK,
+      entity: 'ResourceLink',
+      entityId: newLink.id,
+      before: null,
+      after: {
+        id: newLink.id,
+        resourceId,
+        url: newLink.url,
+        linkType: newLink.linkType,
       },
     });
 
@@ -129,6 +144,16 @@ export async function updateResourceLink(
         where: { id: linkId },
         data: { linkType },
       });
+
+      // Track UPDATE_LINK in AuditLog
+      await recordAuditLog(prisma, {
+        actor: user.email || user.name || 'admin',
+        action: AuditAction.UPDATE_LINK,
+        entity: 'ResourceLink',
+        entityId: linkId,
+        before: { url: currentLink.url, linkType: currentLink.linkType },
+        after: { url: currentLink.url, linkType },
+      });
     }
 
     revalidatePath(`/admin/resources/${resourceId}/edit`);
@@ -153,6 +178,9 @@ export async function deleteResourceLink(
 
     await prisma.$transaction(async (tx) => {
       await tx.linkCheck.deleteMany({
+        where: { linkId },
+      });
+      await tx.linkAudit.deleteMany({
         where: { linkId },
       });
       await tx.resourceLink.delete({

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
-import { prisma, ResourceStatus } from '@repo/database';
+import { prisma, ResourceStatus, AuditAction, recordAuditLog } from '@repo/database';
 
 export interface ActionState {
   error?: string;
@@ -32,7 +32,7 @@ export async function createResource(
   let createdId: string | null = null;
 
   try {
-    await assertAdmin();
+    const user = await assertAdmin();
 
     const name = (formData.get('name') as string)?.trim();
     if (!name) {
@@ -85,6 +85,23 @@ export async function createResource(
     });
 
     createdId = resource.id;
+
+    // Track CREATE_RESOURCE in AuditLog
+    await recordAuditLog(prisma, {
+      actor: user.email || user.name || 'admin',
+      action: AuditAction.CREATE_RESOURCE,
+      entity: 'Resource',
+      entityId: resource.id,
+      before: null,
+      after: {
+        id: resource.id,
+        name: resource.name,
+        status: resource.status,
+        institutionId: resource.institutionId,
+        industry: resource.industry,
+        category: resource.category,
+      },
+    });
   } catch (error: any) {
     return { error: error?.message || 'Failed to create resource.' };
   }
@@ -103,7 +120,14 @@ export async function updateResource(
   formData: FormData
 ): Promise<ActionState> {
   try {
-    await assertAdmin();
+    const user = await assertAdmin();
+
+    const existing = await prisma.resource.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      return { error: 'Resource not found.' };
+    }
 
     const name = (formData.get('name') as string)?.trim();
     if (!name) {
@@ -133,7 +157,7 @@ export async function updateResource(
       }
     }
 
-    await prisma.resource.update({
+    const updated = await prisma.resource.update({
       where: { id },
       data: {
         name,
@@ -150,6 +174,32 @@ export async function updateResource(
         updateFrequency,
         priority,
         apiAvailable,
+      },
+    });
+
+    // Track UPDATE_RESOURCE in AuditLog
+    await recordAuditLog(prisma, {
+      actor: user.email || user.name || 'admin',
+      action: AuditAction.UPDATE_RESOURCE,
+      entity: 'Resource',
+      entityId: id,
+      before: {
+        name: existing.name,
+        description: existing.description,
+        industry: existing.industry,
+        category: existing.category,
+        institutionId: existing.institutionId,
+        countryCoverage: existing.countryCoverage,
+        status: existing.status,
+      },
+      after: {
+        name: updated.name,
+        description: updated.description,
+        industry: updated.industry,
+        category: updated.category,
+        institutionId: updated.institutionId,
+        countryCoverage: updated.countryCoverage,
+        status: updated.status,
       },
     });
   } catch (error: any) {
@@ -170,15 +220,37 @@ export async function updateResourceStatus(
   newStatus: ResourceStatus
 ): Promise<ActionState> {
   try {
-    await assertAdmin();
+    const user = await assertAdmin();
 
     if (!Object.values(ResourceStatus).includes(newStatus)) {
       return { error: 'Invalid lifecycle status specified.' };
     }
 
+    const existing = await prisma.resource.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      return { error: 'Resource not found.' };
+    }
+
     await prisma.resource.update({
       where: { id },
       data: { status: newStatus },
+    });
+
+    // Track ARCHIVE_RESOURCE or RESOURCE_STATUS_CHANGE in AuditLog
+    const action =
+      newStatus === ResourceStatus.ARCHIVED
+        ? AuditAction.ARCHIVE_RESOURCE
+        : AuditAction.RESOURCE_STATUS_CHANGE;
+
+    await recordAuditLog(prisma, {
+      actor: user.email || user.name || 'admin',
+      action,
+      entity: 'Resource',
+      entityId: id,
+      before: { status: existing.status, name: existing.name },
+      after: { status: newStatus, name: existing.name },
     });
 
     revalidatePath('/admin/resources');
@@ -209,6 +281,10 @@ export async function deleteResource(id: string): Promise<ActionState> {
       if (linkIds.length > 0) {
         // Delete link checks
         await tx.linkCheck.deleteMany({
+          where: { linkId: { in: linkIds } },
+        });
+        // Delete link audits
+        await tx.linkAudit.deleteMany({
           where: { linkId: { in: linkIds } },
         });
         // Delete links
