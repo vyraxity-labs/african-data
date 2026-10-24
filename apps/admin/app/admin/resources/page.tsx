@@ -13,7 +13,7 @@ import {
   Button,
   EmptyState,
 } from '@repo/ui';
-import { ResourceStatusActions } from './resource-status-actions';
+import { ResourceTableClient } from './resource-table-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -241,83 +241,11 @@ export default async function AdminResourcesPage(props: PageProps) {
           />
         ) : (
           <div className="space-y-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[35%]">Dataset / Resource</TableHead>
-                  <TableHead>Custodian</TableHead>
-                  <TableHead>Industry / Category</TableHead>
-                  <TableHead>Coverage</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Links</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {resources.map((res) => (
-                  <TableRow key={res.id}>
-                    <TableCell>
-                      <div className="font-semibold text-slate-900 hover:text-emerald-600">
-                        <Link href={`/admin/resources/${res.id}/edit`}>{res.name}</Link>
-                      </div>
-                      {res.description && (
-                        <p className="line-clamp-1 text-xs text-slate-500 mt-0.5">
-                          {res.description}
-                        </p>
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      {res.institution ? (
-                        <span className="text-xs font-medium text-slate-700">
-                          {res.institution.name}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-400 italic">None</span>
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="text-xs text-slate-800">
-                        {res.industry || '—'}
-                      </div>
-                      <div className="text-[11px] text-slate-400">
-                        {res.category || '—'}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <span className="text-xs text-slate-600">
-                        {res.countryCoverage || '—'}
-                      </span>
-                    </TableCell>
-
-                    <TableCell>{getStatusBadge(res.status)}</TableCell>
-
-                    <TableCell>
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                        {res._count.links} endpoints
-                      </span>
-                    </TableCell>
-
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link href={`/admin/resources/${res.id}/edit`}>
-                          <Button size="sm" variant="outline" className="text-xs">
-                            Edit
-                          </Button>
-                        </Link>
-                        <ResourceStatusActions
-                          resourceId={res.id}
-                          resourceName={res.name}
-                          currentStatus={res.status}
-                        />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ResourceTableClient
+              resources={resources as any}
+              currentStatusFilter={statusFilter}
+              draftCount={draftCount}
+            />
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
