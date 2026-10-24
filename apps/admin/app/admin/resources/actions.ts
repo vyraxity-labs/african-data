@@ -306,3 +306,97 @@ export async function deleteResource(id: string): Promise<ActionState> {
     return { error: error?.message || 'Failed to delete resource.' };
   }
 }
+
+/**
+ * Server Action: Batch update resource lifecycle status
+ */
+export async function batchUpdateResourceStatus(
+  ids: string[],
+  newStatus: ResourceStatus
+): Promise<ActionState & { updatedCount?: number }> {
+  try {
+    const user = await assertAdmin();
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return { error: 'No resources selected for batch operation.' };
+    }
+
+    if (!Object.values(ResourceStatus).includes(newStatus)) {
+      return { error: 'Invalid lifecycle status specified.' };
+    }
+
+    const result = await prisma.resource.updateMany({
+      where: { id: { in: ids } },
+      data: { status: newStatus },
+    });
+
+    const action =
+      newStatus === ResourceStatus.ARCHIVED
+        ? AuditAction.ARCHIVE_RESOURCE
+        : AuditAction.RESOURCE_STATUS_CHANGE;
+
+    // Track batch audit log
+    await recordAuditLog(prisma, {
+      actor: user.email || user.name || 'admin',
+      action,
+      entity: 'Resource',
+      entityId: 'batch-status-' + Date.now(),
+      before: null,
+      after: {
+        newStatus,
+        affectedIds: ids,
+        count: result.count,
+      },
+    });
+
+    revalidatePath('/admin/resources');
+    revalidatePath('/admin');
+    return { success: true, updatedCount: result.count };
+  } catch (error: any) {
+    return { error: error?.message || 'Failed to batch update resource status.' };
+  }
+}
+
+/**
+ * Server Action: Publish all resources currently in DRAFT status
+ */
+export async function publishAllDraftResources(): Promise<ActionState & { updatedCount?: number }> {
+  try {
+    const user = await assertAdmin();
+
+    const drafts = await prisma.resource.findMany({
+      where: { status: ResourceStatus.DRAFT },
+      select: { id: true },
+    });
+
+    if (drafts.length === 0) {
+      return { success: true, updatedCount: 0 };
+    }
+
+    const draftIds = drafts.map((d) => d.id);
+
+    const result = await prisma.resource.updateMany({
+      where: { status: ResourceStatus.DRAFT },
+      data: { status: ResourceStatus.ACTIVE },
+    });
+
+    await recordAuditLog(prisma, {
+      actor: user.email || user.name || 'admin',
+      action: AuditAction.RESOURCE_STATUS_CHANGE,
+      entity: 'Resource',
+      entityId: 'publish-all-drafts-' + Date.now(),
+      before: { status: ResourceStatus.DRAFT },
+      after: {
+        newStatus: ResourceStatus.ACTIVE,
+        count: result.count,
+        affectedIds: draftIds,
+      },
+    });
+
+    revalidatePath('/admin/resources');
+    revalidatePath('/admin');
+    return { success: true, updatedCount: result.count };
+  } catch (error: any) {
+    return { error: error?.message || 'Failed to publish draft resources.' };
+  }
+}
